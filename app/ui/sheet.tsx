@@ -24,11 +24,11 @@ export function Sheet({ isOpen, onClose, title, children }: SheetProps) {
             className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-sm"
           />
           <motion.div
-            initial={{ x: '100%' }}
+            initial={{ x: '-100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 z-[70] h-full w-full border-l bg-card p-8 shadow-2xl sm:max-w-md"
+            className="fixed inset-y-0 left-0 z-[70] h-full w-full border-r bg-card p-8 shadow-2xl sm:max-w-md"
           >
             <div className="mb-8 flex items-center justify-between">
               <div className="space-y-1">

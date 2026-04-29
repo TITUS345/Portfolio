@@ -51,6 +51,12 @@ export default function AdminPage() {
 
   const [loading, setLoading] = useState(true);
   const [submittingSection, setSubmittingSection] = useState(false);
+  const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [userName, setUserName] = useState('');
+  const [userRole, setUserRole] = useState('');
+  const [editingToolId, setEditingToolId] = useState<string | null>(null);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -89,12 +95,11 @@ export default function AdminPage() {
     load();
   }, [router]);
 
-  async function handleCreateSection(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmitSection(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmittingSection(true);
     try {
-      // Sending null ensures Prisma doesn't throw a validation error for missing required strings
-      await axios.post('/api/landing', { 
+      const data = { 
         title, 
         subtitle: subtitle || null,
         content, 
@@ -102,9 +107,26 @@ export default function AdminPage() {
         buttonUrl: buttonUrl || null,
         imageUrl: imageUrl || null,
         order: sectionOrder !== '' ? parseInt(sectionOrder) : sections.length 
-      });
+      };
+
+      if (editingSectionId) {
+        await axios.patch(`/api/landing/${editingSectionId}`, data);
+      } else {
+        await axios.post('/api/landing', data);
+      }
+
       const sectionsRes = await axios.get('/api/landing');
       setSections(sectionsRes.data.sections);
+      resetSectionForm();
+    } catch (error: any) {
+      console.error('Error saving section:', error.response?.data || error.message);
+      alert(`Error saving section: ${JSON.stringify(error.response?.data || 'Server error')}`);
+    } finally {
+      setSubmittingSection(false);
+    }
+  }
+
+  function resetSectionForm() {
       setTitle('');
       setSubtitle('');
       setContent('');
@@ -112,19 +134,26 @@ export default function AdminPage() {
       setButtonUrl('');
       setImageUrl('');
       setSectionOrder('');
-    } catch (error: any) {
-      console.error('Error creating section:', error.response?.data || error.message);
-      alert(`Error creating section: ${JSON.stringify(error.response?.data || 'Server error')}`);
-    } finally {
-      setSubmittingSection(false);
-    }
+      setEditingSectionId(null);
   }
 
-  async function handleCreateProject(event: React.FormEvent<HTMLFormElement>) {
+  function handleEditSection(section: LandingSection) {
+    setEditingSectionId(section.id);
+    setTitle(section.title);
+    setSubtitle(section.subtitle || '');
+    setContent(section.content);
+    setButtonText(section.buttonText || '');
+    setButtonUrl(section.buttonUrl || '');
+    setImageUrl(section.imageUrl || '');
+    setSectionOrder(section.order.toString());
+    document.getElementById('section-form')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function handleSubmitProject(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     try {
       const techStackArray = projectTechStack.split(',').map((t) => t.trim()).filter((t) => t !== '');
-      await axios.post('/api/projects', { 
+      const data = { 
         title: projectTitle, 
         description: projectDescription, 
         techStack: techStackArray,
@@ -132,9 +161,24 @@ export default function AdminPage() {
         projectUrl: projectUrl || null,
         githubUrl: projectGithubUrl || null,
         featured: projectFeatured
-      });
+      };
+
+      if (editingProjectId) {
+        await axios.patch(`/api/projects/${editingProjectId}`, data);
+      } else {
+        await axios.post('/api/projects', data);
+      }
+
       const res = await axios.get('/api/projects');
       setProjects(res.data.projects);
+      resetProjectForm();
+    } catch (error: any) {
+      console.error('Error saving project:', error.response?.data || error.message);
+      alert(`Error saving project: ${JSON.stringify(error.response?.data || 'Server error')}`);
+    }
+  }
+
+  function resetProjectForm() {
       setProjectTitle('');
       setProjectDescription('');
       setProjectTechStack('');
@@ -142,25 +186,52 @@ export default function AdminPage() {
       setProjectUrl('');
       setProjectGithubUrl('');
       setProjectFeatured(false);
+      setEditingProjectId(null);
+  }
+
+  function handleEditProject(project: Project) {
+    setEditingProjectId(project.id);
+    setProjectTitle(project.title);
+    setProjectDescription(project.description);
+    setProjectTechStack(project.techStack.join(', '));
+    setProjectImageUrl(project.imageUrl || '');
+    setProjectUrl(project.projectUrl || '');
+    setProjectGithubUrl(project.githubUrl || '');
+    setProjectFeatured(project.featured);
+    document.getElementById('project-form')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function handleSubmitTool(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    try {
+      const data = { name: toolName, category: toolCategory, iconName: toolIconName };
+      if (editingToolId) {
+        await axios.patch(`/api/tools/${editingToolId}`, data);
+      } else {
+        await axios.post('/api/tools', data);
+      }
+      const res = await axios.get('/api/tools');
+      setTools(res.data.tools);
+      resetToolForm();
     } catch (error: any) {
-      console.error('Error creating project:', error.response?.data || error.message);
-      alert(`Error creating project: ${JSON.stringify(error.response?.data || 'Server error')}`);
+      console.error('Error saving tool:', error.response?.data || error.message);
+      alert(`Error saving tool: ${JSON.stringify(error.response?.data || 'Server error')}`);
     }
   }
 
-  async function handleCreateTool(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    try {
-      await axios.post('/api/tools', { name: toolName, category: toolCategory, iconName: toolIconName });
-      const res = await axios.get('/api/tools');
-      setTools(res.data.tools);
-      setToolName('');
-      setToolCategory('');
-      setToolIconName('');
-    } catch (error: any) {
-      console.error('Error creating tool:', error.response?.data || error.message);
-      alert(`Error creating tool: ${JSON.stringify(error.response?.data || 'Server error')}`);
-    }
+  function resetToolForm() {
+    setToolName('');
+    setToolCategory('');
+    setToolIconName('');
+    setEditingToolId(null);
+  }
+
+  function handleEditTool(tool: Tool) {
+    setEditingToolId(tool.id);
+    setToolName(tool.name);
+    setToolCategory(tool.category);
+    setToolIconName(tool.iconName || '');
+    document.getElementById('tool-form')?.scrollIntoView({ behavior: 'smooth' });
   }
 
   async function handleSubmitContact(event: React.FormEvent<HTMLFormElement>) {
@@ -206,6 +277,32 @@ export default function AdminPage() {
     setContactType(contact.type || '');
     setContactIconName(contact.iconName || '');
     document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function handleSubmitUser(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingUserId) return;
+    try {
+      await axios.patch(`/api/users/${editingUserId}`, { name: userName, role: userRole });
+      const usersRes = await axios.get('/api/users');
+      setUsers(usersRes.data.users);
+      resetUserForm();
+    } catch (error: any) {
+      console.error('Error saving user:', error.response?.data || error.message);
+    }
+  }
+
+  function handleEditUser(user: User) {
+    setEditingUserId(user.id);
+    setUserName(user.name || '');
+    setUserRole(user.role);
+    document.getElementById('user-form')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function resetUserForm() {
+    setEditingUserId(null);
+    setUserName('');
+    setUserRole('');
   }
 
   async function handleDeleteUser(userId: string) {
@@ -309,25 +406,43 @@ export default function AdminPage() {
           </div>
           <div className="space-y-3">
             {users.map((user) => (
-              <div key={user.id} className="flex items-center justify-between rounded-3xl border border-border p-4">
-                <div>
+              <div key={user.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-3xl border border-border p-4 gap-3">
+                <div className="min-w-0">
                   <p className="font-semibold text-blue-700">{user.name ?? user.email}</p>
                   <p className="text-sm text-gray-600">{user.email} · {user.role}</p>
                 </div>
-                <Button variant="ghost" className="gap-2 text-destructive" onClick={() => handleDeleteUser(user.id)}>
-                  <Trash2 size={16} />
-                  Delete
-                </Button>
+                <div className="flex gap-2 flex-wrap justify-start sm:justify-end w-full sm:w-auto">
+                  <Button variant="secondary" onClick={() => handleEditUser(user)}>
+                    Edit
+                  </Button>
+                  <Button variant="ghost" className="text-destructive" onClick={() => handleDeleteUser(user.id)}>
+                    Delete
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
+          {editingUserId && (
+            <div id="user-form" className="mt-4 p-4 border rounded-2xl bg-muted/30 space-y-4">
+              <h3 className="font-semibold">Edit User: {userName}</h3>
+              <form className="flex gap-4" onSubmit={handleSubmitUser}>
+                <Input value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="User name" />
+                <select value={userRole} onChange={(e) => setUserRole(e.target.value)} className="rounded-md border p-2 text-sm">
+                  <option value="USER">USER</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+                <Button type="submit">Update</Button>
+                <Button type="button" variant="ghost" onClick={resetUserForm}>Cancel</Button>
+              </form>
+            </div>
+          )}
         </Card>
 
-        <Card>
+        <Card id="section-form">
           <div className="space-y-6">
-            <p className="text-sm uppercase tracking-[0.35em] text-gray-600">New section</p>
-            <h2 className="text-xl font-semibold text-blue-700">Create homepage content</h2>
-          <form className="grid gap-4" onSubmit={handleCreateSection}>
+            <p className="text-sm uppercase tracking-[0.35em] text-gray-600">{editingSectionId ? 'Edit section' : 'New section'}</p>
+            <h2 className="text-xl font-semibold text-blue-700">{editingSectionId ? 'Update homepage content' : 'Create homepage content'}</h2>
+          <form className="grid gap-4" onSubmit={handleSubmitSection}>
             <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Section title" required />
             <Input value={subtitle} onChange={(event) => setSubtitle(event.target.value)} placeholder="Section subtitle (optional)" />
             <Textarea value={content} onChange={(event) => setContent(event.target.value)} rows={4} placeholder="Section description" required />
@@ -339,20 +454,27 @@ export default function AdminPage() {
               <Input value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} placeholder="Image URL (optional)" />
               <Input type="number" value={sectionOrder} onChange={(event) => setSectionOrder(event.target.value)} placeholder={`Order (default: ${sections.length})`} />
             </div>
-            <Button type="submit" disabled={submittingSection}>
-              {submittingSection ? 'Creating...' : 'Create section'}
-            </Button>
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1" disabled={submittingSection}>
+                {submittingSection ? 'Saving...' : (editingSectionId ? 'Update section' : 'Create section')}
+              </Button>
+              {editingSectionId && (
+                <Button type="button" variant="ghost" onClick={resetSectionForm}>
+                  Cancel
+                </Button>
+              )}
+            </div>
           </form>
           </div>
         </Card>
       </div>
 
-      <Card className="space-y-6">
+      <Card className="space-y-6" id="project-form">
         <div>
-          <p className="text-sm uppercase tracking-[0.35em] text-gray-600">New project</p>
-          <h2 className="text-xl font-semibold text-blue-700">Add a featured project</h2>
+          <p className="text-sm uppercase tracking-[0.35em] text-gray-600">{editingProjectId ? 'Edit project' : 'New project'}</p>
+          <h2 className="text-xl font-semibold text-blue-700">{editingProjectId ? 'Update featured project' : 'Add a featured project'}</h2>
         </div>
-        <form className="grid gap-4" onSubmit={handleCreateProject}>
+        <form className="grid gap-4" onSubmit={handleSubmitProject}>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-4">
               <Input value={projectTitle} onChange={(event) => setProjectTitle(event.target.value)} placeholder="Project title" required />
@@ -375,20 +497,38 @@ export default function AdminPage() {
             />
             <label htmlFor="featured" className="text-sm text-gray-600">Display as featured on homepage</label>
           </div>
-          <Button type="submit">Create project</Button>
+          <div className="flex gap-2">
+            <Button type="submit" className="flex-1">
+              {editingProjectId ? 'Update project' : 'Create project'}
+            </Button>
+            {editingProjectId && (
+              <Button type="button" variant="ghost" onClick={resetProjectForm}>
+                Cancel
+              </Button>
+            )}
+          </div>
         </form>
       </Card>
 
-      <Card className="space-y-6">
+      <Card className="space-y-6" id="tool-form">
         <div>
-          <p className="text-sm uppercase tracking-[0.35em] text-gray-600">New tool</p>
-          <h2 className="text-xl font-semibold text-blue-700">Add a technology or tool</h2>
+          <p className="text-sm uppercase tracking-[0.35em] text-gray-600">{editingToolId ? 'Edit tool' : 'New tool'}</p>
+          <h2 className="text-xl font-semibold text-blue-700">{editingToolId ? 'Update technology or tool' : 'Add a technology or tool'}</h2>
         </div>
-        <form className="grid gap-4 md:grid-cols-3" onSubmit={handleCreateTool}>
+        <form className="grid gap-4 md:grid-cols-3" onSubmit={handleSubmitTool}>
           <Input value={toolName} onChange={(event) => setToolName(event.target.value)} placeholder="Tool name (e.g. Next.js)" required />
           <Input value={toolCategory} onChange={(event) => setToolCategory(event.target.value)} placeholder="Category (e.g. Frontend)" required />
           <Input value={toolIconName} onChange={(event) => setToolIconName(event.target.value)} placeholder="Icon identifier (e.g. NEXTJS)" required />
-          <Button type="submit" className="md:col-span-3">Create tool</Button>
+          <div className="md:col-span-3 flex gap-2">
+            <Button type="submit" className="flex-1">
+              {editingToolId ? 'Update tool' : 'Create tool'}
+            </Button>
+            {editingToolId && (
+              <Button type="button" variant="ghost" onClick={resetToolForm}>
+                Cancel
+              </Button>
+            )}
+          </div>
         </form>
       </Card>
 
@@ -420,15 +560,19 @@ export default function AdminPage() {
         <h2 className="text-xl font-semibold text-blue-700">Landing sections</h2>
         <div className="space-y-3">
           {sections.map((section) => (
-            <div key={section.id} className="flex flex-col gap-2 rounded-3xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
+            <div key={section.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-3xl border border-border p-4">
+              <div className="flex-grow min-w-0">
                 <p className="font-semibold text-blue-700">{section.title}</p>
                 <p className="text-sm text-gray-600">{section.subtitle ?? section.content.slice(0, 80) + '...'}</p>
               </div>
-              <Button variant="ghost" className="gap-2 text-destructive" onClick={() => handleDeleteSection(section.id)}>
-                <Trash2 size={16} />
-                Remove
-              </Button>
+                <div className="flex gap-2 flex-wrap justify-end mt-2 sm:mt-0">
+                  <Button variant="secondary" onClick={() => handleEditSection(section)}>
+                    Edit
+                  </Button>
+                  <Button variant="ghost" className="text-destructive" onClick={() => handleDeleteSection(section.id)}>
+                    Delete
+                  </Button>
+                </div>
             </div>
           ))}
         </div>
@@ -438,9 +582,9 @@ export default function AdminPage() {
         <h2 className="text-xl font-semibold text-blue-700">Featured projects</h2>
         <div className="space-y-3">
           {projects.length > 0 ? (
-            projects.map((project) => (
-              <div key={project.id} className="flex flex-col gap-2 rounded-3xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-4">
+            projects.map((project) => ( 
+              <div key={project.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-3xl border border-border p-4">
+                <div className="flex items-center gap-4 flex-grow min-w-0">
                   <Briefcase className={project.featured ? "text-primary" : "text-primary/40"} size={20} />
                   <div>
                     <div className="flex items-center gap-2">
@@ -450,10 +594,14 @@ export default function AdminPage() {
                     <p className="text-sm text-gray-600">{project.techStack.join(' · ')}</p>
                   </div>
                 </div>
-                <Button variant="ghost" className="gap-2 text-destructive" onClick={() => handleDeleteProject(project.id)}>
-                  <Trash2 size={16} />
-                  Remove
-                </Button>
+                <div className="flex gap-2 flex-wrap justify-end mt-2 sm:mt-0">
+                  <Button variant="secondary" onClick={() => handleEditProject(project)}>
+                    Edit
+                  </Button>
+                  <Button variant="ghost" className="text-destructive" onClick={() => handleDeleteProject(project.id)}>
+                    Delete
+                  </Button>
+                </div>
               </div>
             ))
           ) : <p className="text-sm text-gray-600 italic">No projects added yet.</p>}
@@ -465,18 +613,21 @@ export default function AdminPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {tools.length > 0 ? (
             tools.map((tool) => (
-              <div key={tool.id} className="flex items-center justify-between rounded-3xl border border-border p-4">
-                <div className="flex items-center gap-3">
+              <div key={tool.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-3xl border border-border p-4 gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <Wrench className="text-primary/40" size={18} />
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-semibold text-sm text-blue-700">{tool.name}</p>
-                    <p className="text-xs text-gray-600">{tool.category}</p>
+                    <p className="text-xs text-gray-600 truncate">{tool.category}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end w-full sm:w-auto">
                   <span className="rounded-xl bg-muted px-2 py-1 text-[10px] uppercase tracking-wider font-medium">{tool.iconName}</span>
-                  <Button variant="ghost" className="h-8 w-8 text-destructive p-0 flex items-center justify-center" onClick={() => handleDeleteTool(tool.id)}>
-                    <Trash2 size={14} />
+                  <Button variant="secondary" className="h-8 px-3 flex items-center justify-center border border-slate-200 hover:bg-blue-50 text-blue-700" onClick={() => handleEditTool(tool)}>
+                    Edit
+                  </Button>
+                  <Button variant="ghost" className="h-8 px-3 text-destructive flex items-center justify-center" onClick={() => handleDeleteTool(tool.id)}>
+                    Delete
                   </Button>
                 </div>
               </div>
@@ -490,29 +641,25 @@ export default function AdminPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {contacts.length > 0 ? (
             contacts.map((contact) => (
-              <div key={contact.id} className="flex items-center justify-between rounded-3xl border border-border p-4 bg-white shadow-sm text-black">
-                <div className="flex items-center gap-3">
+              <div key={contact.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-3xl border border-border p-4 bg-white shadow-sm text-black gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   {(() => {
                     const IconComponent = getContactIconComponent(contact.type);
                     return <IconComponent className="text-blue-700" size={18} />;
                   })()}
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-bold text-sm">{contact.label}</p>
-                    <p className="text-xs font-medium text-gray-600 truncate max-w-[120px]">{contact.value}</p>
+                    <p className="text-xs font-medium text-gray-600 truncate">{contact.value}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="rounded-xl bg-black px-2 py-1 text-[10px] uppercase tracking-wider font-bold text-white">{contact.type}</span>
-                  <Button  className="h-8 w-8 p-0 flex items-center justify-center border border-slate-200 hover:bg-blue-50 text-blue-700" onClick={() => handleEditContact(contact)}>
+                <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end w-full sm:w-auto">
+                  <span className="rounded-xl bg-black px-2 py-1 text-[10px] uppercase tracking-wider font-bold text-white shrink-0">{contact.type}</span>
+                  <Button variant="secondary" className="h-8 px-3 flex items-center justify-center border border-slate-200 hover:bg-blue-50 text-blue-700" onClick={() => handleEditContact(contact)}>
                     Edit
-                    <Pencil size={14} className="text-blue-700" />
                   </Button>
-                  <div>
-                    <Button variant="secondary" className="h-8 w-8 p-0 flex text-red-500 items-center justify-center border border-red-100 hover:bg-red-50" onClick={() => handleDeleteContact(contact.id)}>
-                      Delete
-                    <Trash2 size={14} className="text-gray-900" />
+                  <Button variant="secondary" className="h-8 px-3 flex text-red-500 items-center justify-center border border-red-100 hover:bg-red-50" onClick={() => handleDeleteContact(contact.id)}>
+                    Delete
                   </Button>
-                  </div>
                 </div>
               </div>
             ))

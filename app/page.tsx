@@ -42,7 +42,7 @@ export default function HomePage() {
         <section className="grid gap-10 pt-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
           <div className="space-y-6">
             <AnimatedText text="Build with purpose, scale with confidence." className="text-4xl font-bold leading-tight sm:text-5xl text-blue-700" />
-            <p className="max-w-2xl text-lg text-gray-800">``I am a fullstack developer experienced in frontend and backend systems, CI/CD, containerization, and REST API-driven projects ``.</p>
+            <p className="max-w-2xl text-lg text-gray-800">``I am a fullstack developer experienced in frontend and backend systems, CI/CD, containerization,Git,GitHub and REST API-driven projects ``.</p>
             <div className="flex flex-wrap items-center gap-4">
               <Button variant="primary" onClick={() => window.location.assign('/auth/signup')}>Start the journey</Button>
               <Button variant="secondary" onClick={() => window.location.assign('/dashboard')} className="border border-transparent hover:border-blue-700 transition-all">Dashboard preview</Button>

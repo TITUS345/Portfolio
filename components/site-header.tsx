@@ -3,14 +3,16 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation'; // Import useRouter for client-side navigation
 import axios from 'axios';
-import { ArrowRight, Mail, Lock, User, Home } from 'lucide-react'; // Add Home icon
+import { ArrowRight, Mail, Lock, User, Home, Menu } from 'lucide-react'; // Add Home and Menu icon
 import { motion } from 'framer-motion';
 import { Sheet } from '@/app/ui/sheet';
 import { Button } from '@/app/ui/button';
 import { Input } from '@/app/ui/input';
+import { useSidebar } from '@/components/sidebar-provider';
 
 
 export default function SiteHeader() {
+  const { toggle } = useSidebar();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
@@ -76,9 +78,11 @@ export default function SiteHeader() {
   };
 
   return (
-    <header className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-6 py-6 sm:flex-row sm:items-center sm:justify-between bg-gray-200">
-      <div className="space-y-2">
-        <p className="text-xs uppercase tracking-[0.35em] text-gray-600">My Fullstack Developer Portfolio</p>
+    <header className="sticky top-0 z-50 w-full border-b border-gray-300 bg-gray-200/95 backdrop-blur-sm shadow-sm transition-all duration-300">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between relative">
+      {/* Logo and Title */}
+      <div className="space-y-1">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-medium">My Fullstack Developer Portfolio</p>
         <div 
           className="flex items-center gap-2 text-lg font-semibold text-blue-700 cursor-pointer"
           onClick={() => router.push('/')}
@@ -92,7 +96,17 @@ export default function SiteHeader() {
           <span>Titus Tarus</span>
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+      
+      {/* Action buttons including the mobile menu toggle */}
+      <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+        {/* Mobile Menu Toggle - now placed before Sign in button */}
+        <Button
+          variant="ghost"
+          className="lg:hidden p-2 rounded-2xl hover:bg-muted"
+          onClick={toggle}
+        >
+          <Menu size={24} className="text-blue-700" />
+        </Button>
         <button 
           onClick={() => setIsLoginOpen(true)}
           className="rounded-full border border-border px-4 py-2 hover:border-primary hover:text-primary transition-all"
@@ -106,6 +120,7 @@ export default function SiteHeader() {
           Start
           <ArrowRight size={16} />
         </button>
+      </div>
       </div>
 
       {/* Login Sheet */}

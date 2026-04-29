@@ -64,7 +64,7 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.35em] text-muted-foreground">User dashboard</p>
-          <h1 className="text-3xl font-bold text-blue-700">Welcome back, {session?.name ?? session?.email}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-700">Welcome back, {session?.name ?? session?.email}</h1>
           <p className="text-sm">The portfolio dashboard summarizes the number of people who have signed in and signup activity across the site.</p>
         </div>
         <Button
