@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  }
+
+
+
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum EventType {
+  SIGNUP
+  SIGNIN
+  VISIT
+}
+
+model User {
+  id               String      @id @default(cuid())
+  email            String      @unique
+  name             String?
+  password         String
+  role             Role        @default(USER)
+  verificationCode String?
+  emailVerified    Boolean     @default(false) // Added this field
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  resetToken       String?     @unique
+  resetTokenExpiry DateTime?
+  events           SiteEvent[]
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  imageUrl    String?
+  projectUrl  String?
+  githubUrl   String?
+  techStack   String[]
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Tool {
+  id       String @id @default(cuid())
+  name     String
+  category String // e.g., "Frontend", "Backend", "DevOps"
+  iconName String // Lucide icon name string
+}
+
+model Languages {
+  id       String @id @default(cuid())
+  name     String
+  category String // e.g., "Frontend", "Backend", "DevOps"
+  iconName String // Lucide icon name string
+}
+
+model Contact {
+  id       String   @id @default(cuid())
+  label    String
+  value    String
+  href     String
+  type     String
+  iconName String
+}
+
+model LandingSection {
+  id         String   @id @default(cuid())
+  title      String
+  subtitle   String?
+  content    String
+  buttonText String?
+  buttonUrl  String?
+  imageUrl   String?
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+}
+
+model SiteEvent {
+  id        String    @id @default(cuid())
+  type      EventType
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    String?
+  email     String?
+  createdAt DateTime  @default(now())
+}

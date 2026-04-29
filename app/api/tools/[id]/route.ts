@@ -1,0 +1,34 @@
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import { getSessionFromRequest, requireAdmin } from '@/app/utils/auth';
+import { toolSchema } from '@/app/utils/validators';
+
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  const session = getSessionFromRequest(request);
+  try {
+    requireAdmin(session);
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const validation = toolSchema.partial().safeParse(body);
+  if (!validation.success) {
+    return NextResponse.json({ error: validation.error.flatten() }, { status: 400 });
+  }
+
+  const tool = await prisma.tool.update({ where: { id: params.id }, data: validation.data });
+  return NextResponse.json({ tool });
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const session = getSessionFromRequest(request);
+  try {
+    requireAdmin(session);
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  await prisma.tool.delete({ where: { id: params.id } });
+  return NextResponse.json({ success: true });
+}
