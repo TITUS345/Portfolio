@@ -29,8 +29,12 @@ export default function PasswordResetPage({ onClose }: PasswordResetPageProps) {
     try {
       await axios.post('/api/auth/request-password-reset', { email });
       setStep('code');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to send code.');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.error || 'Failed to send code.');
+      } else {
+        setError('An unexpected error occurred.');
+      }
     } finally {
       setLoading(false);
     }
@@ -42,8 +46,12 @@ export default function PasswordResetPage({ onClose }: PasswordResetPageProps) {
     try {
       await axios.post('/api/auth/request-password-reset', { email, code, action: 'verify' });
       setStep('password');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Invalid code.');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.error || 'Invalid code.');
+      } else {
+        setError('An unexpected error occurred.');
+      }
     } finally {
       setLoading(false);
     }
@@ -59,8 +67,12 @@ export default function PasswordResetPage({ onClose }: PasswordResetPageProps) {
     try {
       await axios.put('/api/auth/request-password-reset', { email, token: code, newPassword });
       setStep('success');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to reset password.');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.error || 'Failed to reset password.');
+      } else {
+        setError('An unexpected error occurred.');
+      }
     } finally {
       setLoading(false);
     }

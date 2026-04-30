@@ -6,8 +6,19 @@ import { Role } from '@/app/types'; // Import Role from your types file
 import { hashPassword } from '@/app/utils/auth';
 import { sendAdminNotification, sendVerificationEmail } from '@/app/mailer';
 import crypto from 'crypto';
+import { authRateLimiter, getIP } from '@/app/utils/rate-limiter';
 
 export async function POST(request: NextRequest) {
+  // 1. Check Rate Limit
+  const identifier = getIP(request);
+  const { success } = await authRateLimiter.limit(
+    `ratelimit_signup_${identifier}`
+  );
+
+  if (!success) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+  }
+
   const body = await request.json();
   const parsed = signupSchema.safeParse(body);
 

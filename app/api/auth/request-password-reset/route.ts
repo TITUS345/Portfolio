@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { hashPassword } from '../../../utils/auth';
 import axios from 'axios';
+import { authRateLimiter, getIP } from '@/app/utils/rate-limiter';
 
 // Helper to send email
 async function sendResetEmail(to: string, token: string) {
@@ -52,6 +53,16 @@ async function sendResetEmail(to: string, token: string) {
 // POST: Request a password reset (send email with token)
 export async function POST(request: NextRequest) {
   try {
+    // 1. Check Rate Limit
+    const identifier = getIP(request);
+    const { success, limit, reset, remaining } = await authRateLimiter.limit(
+      `ratelimit_reset_${identifier}`
+    );
+
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+    }
+
     const body = await request.json();
     const { email, code, action } = body;
 
@@ -104,6 +115,16 @@ export async function POST(request: NextRequest) {
 
 // PUT: Reset password using the token
 export async function PUT(request: NextRequest) {
+  // Check Rate Limit for the actual reset attempt
+  const identifier = getIP(request);
+  const { success } = await authRateLimiter.limit(
+    `ratelimit_reset_execute_${identifier}`
+  );
+
+  if (!success) {
+    return NextResponse.json({ error: 'Too many attempts. Please try again later.' }, { status: 429 });
+  }
+
   let body;
   try {
     body = await request.json();
