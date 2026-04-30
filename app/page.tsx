@@ -92,7 +92,7 @@ export default function HomePage() {
                         <h3 className="text-xl font-semibold text-blue-700">{section.title}</h3>
                         {section.subtitle ? <p className="text-sm text-gray-800">{section.subtitle}</p> : null}
                       </div>
-                      <ArrowRight className="text-primary" />
+                      {section.buttonUrl ? <ArrowRight className="text-primary" /> : null}
                     </div>
                     <p className="text-sm text-gray-800">{section.content}</p>
                     {section.buttonText ? (
