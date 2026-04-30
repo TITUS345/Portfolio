@@ -37,9 +37,9 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-gray-100 text-gray-800">
+    <div className="flex h-screen w-full overflow-hidden bg-gray-100 text-gray-800 m-0 p-0">
       <SiteSidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto">
         <SiteHeader />
         <main className="mx-auto max-w-7xl px-6 pb-16 w-full">
           <section className="grid gap-10 pt-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
