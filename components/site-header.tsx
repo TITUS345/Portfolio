@@ -109,13 +109,13 @@ export default function SiteHeader() {
         </Button>
         <button 
           onClick={() => setIsLoginOpen(true)}
-          className="rounded-full border border-border px-4 py-2 hover:border-primary hover:text-primary transition-all"
+          className="rounded-full border border-gray-300 bg-white px-5 py-2 text-gray-700 hover:bg-gray-50 hover:border-blue-700 hover:text-blue-700 transition-all shadow-sm font-medium active:scale-95"
         >
           Sign in
         </button>
         <button 
           onClick={() => setIsSignupOpen(true)}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 transition-all"
+          className="inline-flex items-center gap-2 rounded-full bg-blue-700 px-5 py-2 text-white hover:bg-blue-800 transition-all shadow-md font-medium active:scale-95"
         >
           Start
           <ArrowRight size={16} />
@@ -125,7 +125,7 @@ export default function SiteHeader() {
 
       {/* Login Sheet */}
       <Sheet isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} title="Welcome back">
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-xl mt-4">
           <div className="space-y-4 text-gray-800">
             {error && <p className="text-sm font-medium text-destructive">{error}</p>}
             <div className="space-y-2">
@@ -164,7 +164,7 @@ export default function SiteHeader() {
       {/* Signup Sheet */}
       <Sheet isOpen={isSignupOpen} onClose={() => setIsSignupOpen(false)} title="Start the journey">
         {requiresSignupVerification ? (
-          <form onSubmit={handleSignup} className="space-y-6">
+          <form onSubmit={handleSignup} className="space-y-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-xl mt-4">
             <div className="space-y-4 text-gray-800">
               {error && <p className="text-sm font-medium text-destructive">{error}</p>}
               <p className="text-sm text-gray-600">A 6-digit verification code has been sent to {signupEmail}. Please enter it below.</p>
@@ -183,7 +183,7 @@ export default function SiteHeader() {
             </Button>
           </form>
         ) : (
-          <form onSubmit={handleSignup} className="space-y-6">
+          <form onSubmit={handleSignup} className="space-y-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-xl mt-4">
             <div className="space-y-4 text-gray-800">
               {error && <p className="text-sm font-medium text-destructive">{error}</p>}
               <div className="space-y-2">

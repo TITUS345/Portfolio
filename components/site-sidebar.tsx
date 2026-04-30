@@ -46,7 +46,7 @@ export default function SiteSidebar() {
       {/* Mobile Sidebar */}
       <div className="lg:hidden">
         <Sheet isOpen={isOpen} onClose={() => setIsOpen(false)} title="Menu">
-          <div className="space-y-6 mt-4">
+          <div className="space-y-6 mt-6 bg-white p-6 rounded-3xl border border-gray-100 shadow-xl">
             <NavLinks />
             <div className="rounded-3xl border border-border bg-muted p-4 text-sm text-muted-foreground">
               <p className="font-semibold text-foreground">Tips</p>

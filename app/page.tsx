@@ -10,7 +10,7 @@ import { Section } from './ui/section';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import type { Contact, LandingSection, Project, Tool } from '@/app/types';
-import { ArrowRight, Briefcase, Database, Layers, MessageCircle } from 'lucide-react';
+import { ArrowRight, Briefcase, Database, Layers, MessageCircle, Mail, Globe, Phone, PhoneCall } from 'lucide-react';
 
 export default function HomePage() {
   const [landing, setLanding] = useState<LandingSection[]>([]);
@@ -165,12 +165,30 @@ export default function HomePage() {
 
           <Section title="Contact" description="Reach out through email, WhatsApp, phone, or future platforms as this portfolio scales.">
             <div className="grid gap-4 sm:grid-cols-2">
-              {contacts.map((contact) => (
-                <Card key={contact.id} className="space-y-2">
-                  <p className="font-semibold text-blue-700">{contact.label}</p>
-                  <a href={contact.href} className="text-primary hover:underline">{contact.value}</a>
-                </Card>
-              ))}
+              {contacts.map((contact) => {
+                const IconComponent = (() => {
+                  switch (contact.type?.toLowerCase()) {
+                    case 'email': return Mail;
+                    case 'phone': return Phone;
+                    case 'website': return Globe;
+                    default: return PhoneCall;
+                  }
+                })();
+
+                return (
+                  <Card key={contact.id} className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary shrink-0">
+                      <IconComponent size={24} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-blue-700">{contact.label}</p>
+                      <a href={contact.href || '#'} className="text-primary hover:underline block truncate text-sm">
+                        {contact.value}
+                      </a>
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           </Section>
         </main>
