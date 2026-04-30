@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       message: 'If an account with that email exists, a verification code has been sent.' 
     });
   } catch (error: unknown) {
-    //console.error('Password Reset Error:', error);
+    console.error('Password Reset Error:', error);
     return NextResponse.json({ error: 'Failed to initiate password reset. Please try again later.' }, { status: 500 });
   }
 }
@@ -146,9 +146,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ message: 'Password has been reset successfully.' });
   } catch (error: unknown) {
-    //console.error('Error resetting password:', error);
+    console.error('Error resetting password:', error);
     // If we have the email from the already parsed body, invalidate the token
-    if (body?.email) {
+    if (body && typeof body === 'object' && 'email' in body) {
       await prisma.user.update({
         where: { email: body.email },
         data: {
