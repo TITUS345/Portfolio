@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { hashPassword } from '../../../utils/auth';
+import axios from 'axios';
 
 // Helper to send email
 async function sendResetEmail(to: string, token: string) {
@@ -95,9 +96,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       message: 'If an account with that email exists, a verification code has been sent.' 
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    if(axios.isAxiosError(error)) {
+
     // Log specific details to help debugging
-    console.error('Password Reset Error:', error);
+    //console.error('Password Reset Error:', error);
     return NextResponse.json({ error: 'Failed to initiate password reset. Please try again later.' }, { status: 500 });
   }
 }
