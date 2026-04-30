@@ -16,7 +16,7 @@ export async function GET() {
       date: item.createdAt.toISOString().slice(0, 10),
       count: 1,
     }))
-    .reduce<Record<string, number>>((acc, data) => {
+    .reduce((acc: Record<string, number>, data: { date: string; count: number }) => {
       acc[data.date] = (acc[data.date] ?? 0) + 1;
       return acc;
     }, {});
