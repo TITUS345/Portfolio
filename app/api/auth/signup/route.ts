@@ -1,8 +1,8 @@
 // app/api/auth/signup/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { Role } from '@prisma/client';
 import { signupSchema } from '@/app/utils/validators';
+import { Role } from '@/app/types'; // Import Role from your types file
 import { hashPassword } from '@/app/utils/auth';
 import { sendAdminNotification, sendVerificationEmail } from '@/app/mailer';
 import crypto from 'crypto';
@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
 
   const hashedPassword = hashPassword(password);
 
-  let role: Role = Role.USER;
+  let role: Role = 'USER';
   if (adminSecret && adminSecret === process.env.ADMIN_SECRET) {
-    role = Role.ADMIN;
+    role = 'ADMIN';
   }
 
   // Generate 6-digit code for email verification
